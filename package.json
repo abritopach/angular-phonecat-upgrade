@@ -22,7 +22,7 @@
     "angular-route": "1.7.x",
     "bootstrap": "3.3.x",
     "core-js": "^2.5.3",
-    "jquery": "3.3.x",
+    "jquery": "3.4.x",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.3",
     "systemjs": "0.19.40",
