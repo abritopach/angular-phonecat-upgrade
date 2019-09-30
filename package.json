@@ -20,7 +20,7 @@
     "angular-in-memory-web-api": "~0.9.0",
     "angular-resource": "1.7.x",
     "angular-route": "1.7.x",
-    "bootstrap": "3.3.x",
+    "bootstrap": "3.4.x",
     "core-js": "^2.5.3",
     "jquery": "3.3.x",
     "reflect-metadata": "^0.1.13",
