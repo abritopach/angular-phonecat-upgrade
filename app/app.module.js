@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "tslib", "@angular/core", "@angular/platform-browser", "@angular/upgrade/static"], factory);
+        define(["require", "exports", "tslib", "@angular/core", "@angular/platform-browser", "@angular/upgrade/static", "@angular/common/http", "./core/phone/phone.service", "@angular/forms", "./phone-list/phone-list.component"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,6 +13,10 @@
     const core_1 = require("@angular/core");
     const platform_browser_1 = require("@angular/platform-browser");
     const static_1 = require("@angular/upgrade/static");
+    const http_1 = require("@angular/common/http");
+    const phone_service_1 = require("./core/phone/phone.service");
+    const forms_1 = require("@angular/forms");
+    const phone_list_component_1 = require("./phone-list/phone-list.component");
     let AppModule = class AppModule {
         constructor(upgrade) {
             this.upgrade = upgrade;
@@ -25,7 +29,18 @@
         core_1.NgModule({
             imports: [
                 platform_browser_1.BrowserModule,
-                static_1.UpgradeModule
+                static_1.UpgradeModule,
+                http_1.HttpClientModule,
+                forms_1.FormsModule
+            ],
+            providers: [
+                phone_service_1.Phone,
+            ],
+            declarations: [
+                phone_list_component_1.PhoneListComponent,
+            ],
+            entryComponents: [
+                phone_list_component_1.PhoneListComponent,
             ]
         }),
         tslib_1.__metadata("design:paramtypes", [static_1.UpgradeModule])
