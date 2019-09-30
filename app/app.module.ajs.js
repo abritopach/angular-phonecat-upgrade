@@ -7,4 +7,4 @@ angular.module('phonecatApp', [
     'phoneDetail',
     'phoneList'
 ]);
-//# sourceMappingURL=app.module.js.map
+//# sourceMappingURL=app.module.ajs.js.map
