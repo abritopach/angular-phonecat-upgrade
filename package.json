@@ -14,6 +14,14 @@
     "jquery": "3.3.x"
   },
   "devDependencies": {
+    "@types/angular": "^1.6.56",
+    "@types/angular-animate": "^1.5.10",
+    "@types/angular-cookies": "^1.4.5",
+    "@types/angular-mocks": "^1.7.0",
+    "@types/angular-resource": "^1.5.15",
+    "@types/angular-route": "^1.7.0",
+    "@types/angular-sanitize": "^1.7.0",
+    "@types/jasmine": "^3.4.1",
     "angular-mocks": "1.7.x",
     "cpx": "^1.5.0",
     "http-server": "^0.11.1",
@@ -22,7 +30,8 @@
     "karma-chrome-launcher": "^2.2.0",
     "karma-firefox-launcher": "^1.1.0",
     "karma-jasmine": "^1.1.2",
-    "protractor": "^5.4.1"
+    "protractor": "^5.4.1",
+    "typescript": "^3.6.3"
   },
   "scripts": {
     "postinstall": "npm run copy-libs",
