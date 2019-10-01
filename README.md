@@ -9,7 +9,41 @@ AngularJS is the name for all 1.x versions of Angular.
 
 The full migration guide can be found at https://angular.io/guide/upgrade#upgrading-from-angularjs-to-angular.
 
-## AngularJS Phone Catalog Tutorial Application
+## Application Directory Layout After Upgrade
+
+```
+aot/                     --> 
+app/                     --> all the source code of the app (along with unit tests)
+  lib/...                --> 3rd party bootstrap CSS library
+  core/                  --> all the source code of the core module (stuff used throughout the app)
+    checkmark/...        --> files for the `checkmark` filter, including TS source code, specs
+    phone/...            --> files for the phone service, including TS source code, specs
+  img/...                --> image files
+  phone-detail/...       --> files for the `phoneDetail` component, including TS source code, HTML templates, specs
+  phone-list/...         --> files for the `phoneList` component, including TS source code, HTML templates, specs
+  phones/...             --> static JSON files with phone data (used to fake a backend API)
+  app.css                --> default stylesheet
+  app.component.ts       --> the main app component
+  app.module.ts          --> the main app module
+
+e2e-tests/               --> config and source files for e2e tests
+  protractor.conf.js     --> config file for running e2e tests with Protractor
+  scenarios.ts          --> e2e specs
+
+node_modules/...         --> 3rd party libraries and development tools (fetched using `npm`)
+
+karma.conf.js            --> config file for running unit tests with Karma
+package.json             --> Node.js specific metadata, including development tools dependencies
+package-lock.json        --> Npm specific metadata, including versions of installed development tools dependencies
+index.html               --> app layout file (the main HTML template file of the app)
+main.ts
+main-aot.ts
+systemjs.config.js
+systemjs-angular-loader.js
+tsconfig.json
+```
+
+## Original AngularJS Phone Catalog Tutorial Application
 
 
 ## Overview
