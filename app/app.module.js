@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "tslib", "@angular/core", "@angular/platform-browser", "@angular/upgrade/static", "@angular/common/http", "./core/phone/phone.service", "@angular/forms", "./phone-list/phone-list.component", "./ajs-upgraded-providers", "./phone-detail/phone-detail.component"], factory);
+        define(["require", "exports", "tslib", "@angular/core", "@angular/platform-browser", "@angular/upgrade/static", "@angular/common/http", "./core/phone/phone.service", "@angular/forms", "./phone-list/phone-list.component", "./ajs-upgraded-providers", "./phone-detail/phone-detail.component", "./core/checkmark/checkmark.pipe"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -19,6 +19,7 @@
     const phone_list_component_1 = require("./phone-list/phone-list.component");
     const ajs_upgraded_providers_1 = require("./ajs-upgraded-providers");
     const phone_detail_component_1 = require("./phone-detail/phone-detail.component");
+    const checkmark_pipe_1 = require("./core/checkmark/checkmark.pipe");
     let AppModule = class AppModule {
         constructor(upgrade) {
             this.upgrade = upgrade;
@@ -41,7 +42,8 @@
             ],
             declarations: [
                 phone_list_component_1.PhoneListComponent,
-                phone_detail_component_1.PhoneDetailComponent
+                phone_detail_component_1.PhoneDetailComponent,
+                checkmark_pipe_1.CheckmarkPipe
             ],
             entryComponents: [
                 phone_list_component_1.PhoneListComponent,

@@ -12,6 +12,8 @@ import { routeParamsProvider } from './ajs-upgraded-providers';
 
 import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
 
+import { CheckmarkPipe } from './core/checkmark/checkmark.pipe';
+
 @NgModule({
     imports: [ 
         BrowserModule,
@@ -25,7 +27,8 @@ import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
     ],
     declarations: [
         PhoneListComponent,
-        PhoneDetailComponent
+        PhoneDetailComponent,
+        CheckmarkPipe
     ],
     entryComponents: [
         PhoneListComponent,

@@ -16,7 +16,6 @@ export class PhoneListComponent {
   constructor(phone: Phone) {
     phone.query().subscribe(phones => {
       this.phones = phones;
-      console.log(this.phones);
     });
     this.orderProp = 'age';
   }
