@@ -48,6 +48,7 @@
       </ul>
       -->
 
+      <!--
       <ul class="phones">
           <li *ngFor="let phone of getPhones()"
               class="thumbnail phone-list-item">
@@ -58,6 +59,18 @@
             <p>{{phone.snippet}}</p>
           </li>
         </ul>
+        -->
+      
+      <ul class="phones">
+        <li *ngFor="let phone of getPhones()"
+            class="thumbnail phone-list-item">
+          <a [routerLink]="['/phones', phone.id]" class="thumb">
+            <img [src]="phone.imageUrl" [alt]="phone.name" />
+          </a>
+          <a [routerLink]="['/phones', phone.id]" class="name">{{phone.name}}</a>
+          <p>{{phone.snippet}}</p>
+        </li>
+      </ul>
 
     </div>
   </div>

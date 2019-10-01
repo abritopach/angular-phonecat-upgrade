@@ -14,18 +14,23 @@ import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
 
 import { CheckmarkPipe } from './core/checkmark/checkmark.pipe';
 
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent }     from './app.component';
+
 @NgModule({
     imports: [ 
         BrowserModule,
         UpgradeModule,
         HttpClientModule,
-        FormsModule
+        FormsModule,
+        AppRoutingModule
     ],
     providers: [
         Phone,
         routeParamsProvider
     ],
     declarations: [
+        AppComponent,
         PhoneListComponent,
         PhoneDetailComponent,
         CheckmarkPipe
@@ -33,11 +38,14 @@ import { CheckmarkPipe } from './core/checkmark/checkmark.pipe';
     entryComponents: [
         PhoneListComponent,
         PhoneDetailComponent
-    ]
+    ],
+    bootstrap: [ AppComponent ]
 })
 export class AppModule {
-    constructor(private upgrade: UpgradeModule) { }
+    constructor(/*private upgrade: UpgradeModule*/) { }
+    /*
     ngDoBootstrap() {
         this.upgrade.bootstrap(document.documentElement, ['phonecatApp'], { strictDi: true });
     }
+    */
 }

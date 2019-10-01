@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "tslib", "@angular/core", "@angular/platform-browser", "@angular/upgrade/static", "@angular/common/http", "./core/phone/phone.service", "@angular/forms", "./phone-list/phone-list.component", "./ajs-upgraded-providers", "./phone-detail/phone-detail.component", "./core/checkmark/checkmark.pipe"], factory);
+        define(["require", "exports", "tslib", "@angular/core", "@angular/platform-browser", "@angular/upgrade/static", "@angular/common/http", "./core/phone/phone.service", "@angular/forms", "./phone-list/phone-list.component", "./ajs-upgraded-providers", "./phone-detail/phone-detail.component", "./core/checkmark/checkmark.pipe", "./app-routing.module", "./app.component"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -20,13 +20,10 @@
     const ajs_upgraded_providers_1 = require("./ajs-upgraded-providers");
     const phone_detail_component_1 = require("./phone-detail/phone-detail.component");
     const checkmark_pipe_1 = require("./core/checkmark/checkmark.pipe");
+    const app_routing_module_1 = require("./app-routing.module");
+    const app_component_1 = require("./app.component");
     let AppModule = class AppModule {
-        constructor(upgrade) {
-            this.upgrade = upgrade;
-        }
-        ngDoBootstrap() {
-            this.upgrade.bootstrap(document.documentElement, ['phonecatApp'], { strictDi: true });
-        }
+        constructor( /*private upgrade: UpgradeModule*/) { }
     };
     AppModule = tslib_1.__decorate([
         core_1.NgModule({
@@ -34,13 +31,15 @@
                 platform_browser_1.BrowserModule,
                 static_1.UpgradeModule,
                 http_1.HttpClientModule,
-                forms_1.FormsModule
+                forms_1.FormsModule,
+                app_routing_module_1.AppRoutingModule
             ],
             providers: [
                 phone_service_1.Phone,
                 ajs_upgraded_providers_1.routeParamsProvider
             ],
             declarations: [
+                app_component_1.AppComponent,
                 phone_list_component_1.PhoneListComponent,
                 phone_detail_component_1.PhoneDetailComponent,
                 checkmark_pipe_1.CheckmarkPipe
@@ -48,9 +47,10 @@
             entryComponents: [
                 phone_list_component_1.PhoneListComponent,
                 phone_detail_component_1.PhoneDetailComponent
-            ]
+            ],
+            bootstrap: [app_component_1.AppComponent]
         }),
-        tslib_1.__metadata("design:paramtypes", [static_1.UpgradeModule])
+        tslib_1.__metadata("design:paramtypes", [])
     ], AppModule);
     exports.AppModule = AppModule;
 });
