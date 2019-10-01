@@ -1,56 +1,23 @@
-/*
-declare var angular: angular.IAngularStatic;
-import { Phone, PhoneData } from '../core/phone/phone.service';
-
-class PhoneListController {
-  // phones: any[];
-  phones: PhoneData[];
-  orderProp: string;
-  // query: string;
-
-  // The dependency injection annotations are attached to the class using a static property $inject.
-  // At runtime this becomes the PhoneListController.$inject property.
-  // static $inject = ['Phone'];
-  static $inject = ['phone'];
-  // constructor(Phone: any) {
-  constructor(phone: Phone) {
-    // this.phones = Phone.query();
-    phone.query().subscribe(phones => {
-      this.phones = phones;
-    });
-    this.orderProp = 'age';
-  }
-
-}
-
-
-// Register `phoneList` component, along with its associated controller and template
-angular.
-  module('phoneList').
-  component('phoneList', {
-    templateUrl: 'phone-list/phone-list.template.html',
-    controller: PhoneListController
-  });
-*/
 (function (factory) {
     if (typeof module === "object" && typeof module.exports === "object") {
         var v = factory(require, exports);
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "tslib", "@angular/core", "../core/phone/phone.service", "@angular/upgrade/static"], factory);
+        define(["require", "exports", "tslib", "@angular/upgrade/static", "@angular/core", "../core/phone/phone.service"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const tslib_1 = require("tslib");
+    const static_1 = require("@angular/upgrade/static");
     const core_1 = require("@angular/core");
     const phone_service_1 = require("../core/phone/phone.service");
-    const static_1 = require("@angular/upgrade/static");
     let PhoneListComponent = class PhoneListComponent {
         constructor(phone) {
             phone.query().subscribe(phones => {
                 this.phones = phones;
+                console.log(this.phones);
             });
             this.orderProp = 'age';
         }

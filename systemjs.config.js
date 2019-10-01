@@ -89,7 +89,7 @@
         // other libraries
         'rxjs': 'npm:rxjs',
         'angular-in-memory-web-api': 'npm:angular-in-memory-web-api',
-        'tslib': 'npm:tslib/tslib.js'
+        'tslib': 'npm:tslib/tslib.js',
         // #docregion paths
       },
       // #enddocregion paths

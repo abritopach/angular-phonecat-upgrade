@@ -26,6 +26,8 @@ angular.module('core.phone')
   .factory('phone', downgradeInjectable(Phone));
 
 /*
+'use strict';
+
 angular.
   module('core.phone').
   factory('Phone', ['$resource',

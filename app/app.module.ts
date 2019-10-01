@@ -8,6 +8,10 @@ import { Phone } from './core/phone/phone.service';
 import { FormsModule } from '@angular/forms';
 import { PhoneListComponent } from './phone-list/phone-list.component';
 
+import { routeParamsProvider } from './ajs-upgraded-providers';
+
+import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
+
 @NgModule({
     imports: [ 
         BrowserModule,
@@ -17,13 +21,16 @@ import { PhoneListComponent } from './phone-list/phone-list.component';
     ],
     providers: [
         Phone,
+        routeParamsProvider
     ],
     declarations: [
         PhoneListComponent,
-      ],
-      entryComponents: [
+        PhoneDetailComponent
+    ],
+    entryComponents: [
         PhoneListComponent,
-      ]
+        PhoneDetailComponent
+    ]
 })
 export class AppModule {
     constructor(private upgrade: UpgradeModule) { }

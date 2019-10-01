@@ -1,43 +1,8 @@
-/*
 declare var angular: angular.IAngularStatic;
-import { Phone, PhoneData } from '../core/phone/phone.service';
-
-class PhoneListController {
-  // phones: any[];
-  phones: PhoneData[];
-  orderProp: string;
-  // query: string;
-
-  // The dependency injection annotations are attached to the class using a static property $inject. 
-  // At runtime this becomes the PhoneListController.$inject property.
-  // static $inject = ['Phone'];
-  static $inject = ['phone'];
-  // constructor(Phone: any) {
-  constructor(phone: Phone) {
-    // this.phones = Phone.query();
-    phone.query().subscribe(phones => {
-      this.phones = phones;
-    });
-    this.orderProp = 'age';
-  }
-
-}
-
-
-// Register `phoneList` component, along with its associated controller and template
-angular.
-  module('phoneList').
-  component('phoneList', {
-    templateUrl: 'phone-list/phone-list.template.html',
-    controller: PhoneListController
-  });
-*/
+import { downgradeComponent } from '@angular/upgrade/static';
 
 import { Component } from '@angular/core';
 import { Phone, PhoneData } from '../core/phone/phone.service';
-
-declare var angular: angular.IAngularStatic;
-import { downgradeComponent } from '@angular/upgrade/static';
 
 @Component({
   selector: 'phone-list',
@@ -51,6 +16,7 @@ export class PhoneListComponent {
   constructor(phone: Phone) {
     phone.query().subscribe(phones => {
       this.phones = phones;
+      console.log(this.phones);
     });
     this.orderProp = 'age';
   }

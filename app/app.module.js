@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "tslib", "@angular/core", "@angular/platform-browser", "@angular/upgrade/static", "@angular/common/http", "./core/phone/phone.service", "@angular/forms", "./phone-list/phone-list.component"], factory);
+        define(["require", "exports", "tslib", "@angular/core", "@angular/platform-browser", "@angular/upgrade/static", "@angular/common/http", "./core/phone/phone.service", "@angular/forms", "./phone-list/phone-list.component", "./ajs-upgraded-providers", "./phone-detail/phone-detail.component"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -17,6 +17,8 @@
     const phone_service_1 = require("./core/phone/phone.service");
     const forms_1 = require("@angular/forms");
     const phone_list_component_1 = require("./phone-list/phone-list.component");
+    const ajs_upgraded_providers_1 = require("./ajs-upgraded-providers");
+    const phone_detail_component_1 = require("./phone-detail/phone-detail.component");
     let AppModule = class AppModule {
         constructor(upgrade) {
             this.upgrade = upgrade;
@@ -35,12 +37,15 @@
             ],
             providers: [
                 phone_service_1.Phone,
+                ajs_upgraded_providers_1.routeParamsProvider
             ],
             declarations: [
                 phone_list_component_1.PhoneListComponent,
+                phone_detail_component_1.PhoneDetailComponent
             ],
             entryComponents: [
                 phone_list_component_1.PhoneListComponent,
+                phone_detail_component_1.PhoneDetailComponent
             ]
         }),
         tslib_1.__metadata("design:paramtypes", [static_1.UpgradeModule])

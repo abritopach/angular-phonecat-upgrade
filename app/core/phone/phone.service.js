@@ -33,6 +33,8 @@
         .factory('phone', static_1.downgradeInjectable(Phone));
 });
 /*
+'use strict';
+
 angular.
   module('core.phone').
   factory('Phone', ['$resource',
