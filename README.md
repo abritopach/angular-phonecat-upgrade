@@ -1,4 +1,15 @@
-# AngularJS Phone Catalog Tutorial Application
+# Angular-Phonecat-Upgrade
+
+## Overview
+
+Sample project where you migrate from AngularJS Phone Catalog to Angular (Angular 8) Phone Catalog.
+
+Angular is the name for the Angular of today and tomorrow.
+AngularJS is the name for all 1.x versions of Angular.
+
+The full migration guide can be found at https://angular.io/guide/upgrade#upgrading-from-angularjs-to-angular.
+
+## AngularJS Phone Catalog Tutorial Application
 
 
 ## Overview
@@ -261,6 +272,22 @@ karma.conf.js            --> config file for running unit tests with Karma
 package.json             --> Node.js specific metadata, including development tools dependencies
 package-lock.json        --> Npm specific metadata, including versions of installed development tools dependencies
 ```
+
+## Tools to help with AngularJS to Angular Migrations
+
+### ngMigration Assistant
+
+[ngMigration Assistant](https://github.com/ellamaolson/ngMigration-Assistant) is a command-line tool that analyzes an AngularJS application and recommends a migration path. It provides statistics on the complexity, size, and patterns of an app. It outlines the necessary preparation work for migrating to Angular.
+
+### ngMigration Forum
+
+The new [ngMigration Forum](https://github.com/angular/ngMigration-Forum/wiki) is a community hub that provides a starting place to find information about migration paths, tools, and to consolidate some of the best information and experts from the web.
+
+## Others AngularJS to Angular migration repositories
+
+* https://github.com/angular/angular/tree/master/aio/content/examples/upgrade-phonecat-2-hybrid
+* https://github.com/timofeysie/angular-phonecat-upgrade
+* https://github.com/melxx001/angular2-phonecat-migration
 
 ## Contact
 
