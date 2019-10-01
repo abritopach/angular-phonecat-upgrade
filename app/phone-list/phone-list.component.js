@@ -4,13 +4,12 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "tslib", "@angular/upgrade/static", "@angular/core", "../core/phone/phone.service"], factory);
+        define(["require", "exports", "tslib", "@angular/core", "../core/phone/phone.service"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const tslib_1 = require("tslib");
-    const static_1 = require("@angular/upgrade/static");
     const core_1 = require("@angular/core");
     const phone_service_1 = require("../core/phone/phone.service");
     let PhoneListComponent = class PhoneListComponent {
@@ -60,7 +59,5 @@
         tslib_1.__metadata("design:paramtypes", [phone_service_1.Phone])
     ], PhoneListComponent);
     exports.PhoneListComponent = PhoneListComponent;
-    angular.module('phoneList')
-        .directive('phoneList', static_1.downgradeComponent({ component: PhoneListComponent }));
 });
 //# sourceMappingURL=phone-list.component.js.map

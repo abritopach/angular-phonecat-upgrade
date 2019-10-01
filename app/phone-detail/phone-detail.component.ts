@@ -1,10 +1,6 @@
-declare var angular: angular.IAngularStatic;
-import { downgradeComponent } from '@angular/upgrade/static';
-
 import { Component } from '@angular/core';
 
 import { Phone, PhoneData } from '../core/phone/phone.service';
-import { RouteParams } from '../ajs-upgraded-providers';
 
 import { ActivatedRoute } from '@angular/router';
 
@@ -16,13 +12,7 @@ export class PhoneDetailComponent {
   phone: PhoneData;
   mainImageUrl: string;
 
-  constructor(/*routeParams: RouteParams*/, phone: Phone, activatedRoute: ActivatedRoute) {
-    /*
-    phone.get(routeParams['phoneId']).subscribe(phone => {
-      this.phone = phone;
-      this.setImage(phone.images[0]);
-    });
-    */
+  constructor(phone: Phone, activatedRoute: ActivatedRoute) {
    phone.get(activatedRoute.snapshot.paramMap.get('phoneId'))
       .subscribe((p: PhoneData) => {
         this.phone = p;
@@ -34,9 +24,3 @@ export class PhoneDetailComponent {
     this.mainImageUrl = imageUrl;
   }
 }
-
-angular.module('phoneDetail')
-  .directive(
-    'phoneDetail',
-    downgradeComponent({component: PhoneDetailComponent}) as angular.IDirectiveFactory
-  );
