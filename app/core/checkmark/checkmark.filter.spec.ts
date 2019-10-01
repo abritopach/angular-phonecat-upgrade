@@ -1,14 +1,10 @@
-'use strict';
+import { CheckmarkPipe } from './checkmark.pipe';
 
-describe('checkmark', function() {
+describe('CheckmarkPipe', function() {
 
-  beforeEach(module('core'));
-
-  it('should convert boolean values to unicode checkmark or cross',
-    inject(function(checkmarkFilter) {
-      expect(checkmarkFilter(true)).toBe('\u2713');
-      expect(checkmarkFilter(false)).toBe('\u2718');
-    })
-  );
-
+  it('should convert boolean values to unicode checkmark or cross', function () {
+    const checkmarkPipe = new CheckmarkPipe();
+    expect(checkmarkPipe.transform(true)).toBe('\u2713');
+    expect(checkmarkPipe.transform(false)).toBe('\u2718');
+  });
 });

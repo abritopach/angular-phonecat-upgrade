@@ -1,43 +1,49 @@
-'use strict';
-
-describe('Phone', function() {
-  var $httpBackend;
-  var Phone;
-  var phonesData = [
-    {name: 'Phone X'},
-    {name: 'Phone Y'},
-    {name: 'Phone Z'}
-  ];
-
-  // Add a custom equality tester before each test
-  beforeEach(function() {
-    jasmine.addCustomEqualityTester(angular.equals);
-  });
-
-  // Load the module that contains the `Phone` service before each test
-  beforeEach(module('core.phone'));
-
-  // Instantiate the service and "train" `$httpBackend` before each test
-  beforeEach(inject(function(_$httpBackend_, _Phone_) {
-    $httpBackend = _$httpBackend_;
-    $httpBackend.expectGET('phones/phones.json').respond(phonesData);
-
-    Phone = _Phone_;
-  }));
-
-  // Verify that there are no outstanding expectations or requests after each test
-  afterEach(function () {
-    $httpBackend.verifyNoOutstandingExpectation();
-    $httpBackend.verifyNoOutstandingRequest();
-  });
-
-  it('should fetch the phones data from `/phones/phones.json`', function() {
-    var phones = Phone.query();
-
-    expect(phones).toEqual([]);
-
-    $httpBackend.flush();
-    expect(phones).toEqual(phonesData);
-  });
-
+(function (factory) {
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === "function" && define.amd) {
+        define(["require", "exports", "@angular/core/testing", "@angular/common/http/testing", "./phone.service"], factory);
+    }
+})(function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    const testing_1 = require("@angular/core/testing");
+    const testing_2 = require("@angular/common/http/testing");
+    const phone_service_1 = require("./phone.service");
+    describe('Phone', function () {
+        let phone;
+        let phonesData = [
+            { name: 'Phone X', snippet: '', images: [] },
+            { name: 'Phone Y', snippet: '', images: [] },
+            { name: 'Phone Z', snippet: '', images: [] }
+        ];
+        let httpMock;
+        beforeEach(() => {
+            testing_1.TestBed.configureTestingModule({
+                imports: [
+                    testing_2.HttpClientTestingModule
+                ],
+                providers: [
+                    phone_service_1.Phone,
+                ]
+            });
+        });
+        beforeEach(testing_1.inject([testing_2.HttpTestingController, phone_service_1.Phone], (_httpMock_, _phone_) => {
+            httpMock = _httpMock_;
+            phone = _phone_;
+        }));
+        afterEach(() => {
+            httpMock.verify();
+        });
+        it('should fetch the phones data from `/phones/phones.json`', () => {
+            phone.query().subscribe(result => {
+                expect(result).toEqual(phonesData);
+            });
+            const req = httpMock.expectOne(`/phones/phones.json`);
+            req.flush(phonesData);
+        });
+    });
 });
+//# sourceMappingURL=phone.service.spec.js.map

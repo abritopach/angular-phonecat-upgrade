@@ -1,36 +1,59 @@
-'use strict';
+// #docregion
+// #docregion activatedroute
+import { ActivatedRoute } from '@angular/router';
 
-describe('phoneDetail', function() {
+// #enddocregion activatedroute
+import { Observable, of } from 'rxjs';
 
-  // Load the module that contains the `phoneDetail` component before each test
-  beforeEach(module('phoneDetail'));
+import { async, TestBed } from '@angular/core/testing';
 
-  // Test the controller
-  describe('PhoneDetailController', function() {
-    var $httpBackend, ctrl;
-    var xyzPhoneData = {
-      name: 'phone xyz',
-      images: ['image/url1.png', 'image/url2.png']
-    };
+import { PhoneDetailComponent } from './phone-detail.component';
+import { Phone, PhoneData } from '../core/phone/phone.service';
+import { CheckmarkPipe } from '../core/checkmark/checkmark.pipe';
 
-    beforeEach(inject(function($componentController, _$httpBackend_, $routeParams) {
-      $httpBackend = _$httpBackend_;
-      $httpBackend.expectGET('phones/xyz.json').respond(xyzPhoneData);
+function xyzPhoneData(): PhoneData {
+  return {
+    name: 'phone xyz',
+    snippet: '',
+    images: ['image/url1.png', 'image/url2.png']
+  };
+}
 
-      $routeParams.phoneId = 'xyz';
+class MockPhone {
+  get(id: string): Observable<PhoneData> {
+    return of(xyzPhoneData());
+  }
+}
 
-      ctrl = $componentController('phoneDetail');
-    }));
+// #docregion activatedroute
 
-    it('should fetch the phone details', function() {
-      jasmine.addCustomEqualityTester(angular.equals);
+class ActivatedRouteMock {
+  constructor(public snapshot: any) {}
+}
 
-      expect(ctrl.phone).toEqual({});
+// #enddocregion activatedroute
 
-      $httpBackend.flush();
-      expect(ctrl.phone).toEqual(xyzPhoneData);
-    });
+describe('PhoneDetailComponent', () => {
 
+  // #docregion activatedroute
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ CheckmarkPipe, PhoneDetailComponent ],
+      providers: [
+        { provide: Phone, useClass: MockPhone },
+        { provide: ActivatedRoute, useValue: new ActivatedRouteMock({ params: { 'phoneId': 1 } }) }
+      ]
+    })
+    .compileComponents();
+  }));
+  // #enddocregion activatedroute
+
+  it('should fetch phone detail', () => {
+    const fixture = TestBed.createComponent(PhoneDetailComponent);
+    fixture.detectChanges();
+    let compiled = fixture.debugElement.nativeElement;
+    expect(compiled.querySelector('h1').textContent).toContain(xyzPhoneData().name);
   });
 
 });

@@ -1,35 +1,66 @@
-'use strict';
+/* tslint:disable */
+// #docregion
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { SpyLocation } from '@angular/common/testing';
 
-describe('phoneList', function() {
+import { PhoneListComponent } from './phone-list.component';
+import { Phone, PhoneData } from '../core/phone/phone.service';
 
-  // Load the module that contains the `phoneList` component before each test
-  beforeEach(module('phoneList'));
+class ActivatedRouteMock {
+  constructor(public snapshot: any) {}
+}
 
-  // Test the controller
-  describe('PhoneListController', function() {
-    var $httpBackend, ctrl;
+class MockPhone {
+  query(): Observable<PhoneData[]> {
+    return of([
+      {name: 'Nexus S', snippet: '', images: []},
+      {name: 'Motorola DROID', snippet: '', images: []}
+    ]);
+  }
+}
 
-    beforeEach(inject(function($componentController, _$httpBackend_) {
-      $httpBackend = _$httpBackend_;
-      $httpBackend.expectGET('phones/phones.json')
-                  .respond([{name: 'Nexus S'}, {name: 'Motorola DROID'}]);
+let fixture: ComponentFixture<PhoneListComponent>;
 
-      ctrl = $componentController('phoneList');
-    }));
+describe('PhoneList', () => {
 
-    it('should create a `phones` property with 2 phones fetched with `$http`', function() {
-      jasmine.addCustomEqualityTester(angular.equals);
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ PhoneListComponent ],
+      providers: [
+        { provide: ActivatedRoute, useValue: new ActivatedRouteMock({ params: { 'phoneId': 1 } }) },
+        { provide: Location, useClass: SpyLocation },
+        { provide: Phone, useClass: MockPhone },
+      ],
+      schemas: [ NO_ERRORS_SCHEMA ]
+    })
+    .compileComponents();
+  }));
 
-      expect(ctrl.phones).toEqual([]);
+  beforeEach(() => {
+    fixture = TestBed.createComponent(PhoneListComponent);
+  });
 
-      $httpBackend.flush();
-      expect(ctrl.phones).toEqual([{name: 'Nexus S'}, {name: 'Motorola DROID'}]);
-    });
+  it('should create "phones" model with 2 phones fetched from xhr', () => {
+    fixture.detectChanges();
+    let compiled = fixture.debugElement.nativeElement;
+    expect(compiled.querySelectorAll('.phone-list-item').length).toBe(2);
+    expect(
+      compiled.querySelector('.phone-list-item:nth-child(1)').textContent
+    ).toContain('Motorola DROID');
+    expect(
+      compiled.querySelector('.phone-list-item:nth-child(2)').textContent
+    ).toContain('Nexus S');
+  });
 
-    it('should set a default value for the `orderProp` property', function() {
-      expect(ctrl.orderProp).toBe('age');
-    });
-
+  xit('should set the default value of orderProp model', () => {
+    fixture.detectChanges();
+    let compiled = fixture.debugElement.nativeElement;
+    expect(
+      compiled.querySelector('select option:last-child').selected
+    ).toBe(true);
   });
 
 });
