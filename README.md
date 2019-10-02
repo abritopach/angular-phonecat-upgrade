@@ -21,19 +21,19 @@ So that you don't have the problems I had I leave the code in each step.
 
 Install TypeScript to the project.
 
-```
+```bash
   npm i typescript --save-dev
 ```
 
 Install type definitions for the existing libraries that you're using but that don't come with prepackaged types: AngularJS and the Jasmine unit test framework.
 
-```
+```bash
   npm install @types/jasmine @types/angular @types/angular-animate @types/angular-cookies @types/angular-mocks @types/angular-resource @types/angular-route @types/angular-sanitize --save-dev
 ```
 
 Add a tsconfig.json in the project directory.
 
-```
+```bash
   {
     "compileOnSave": false,
     "compilerOptions": {
@@ -62,7 +62,7 @@ Add a tsconfig.json in the project directory.
 
 Add some npm scripts in package.json to compile the TypeScript files to JavaScript (based on the tsconfig.json configuration file).
 
-```
+```bash
   "scripts": {
   "tsc": "tsc",
   "tsc:w": "tsc -w",
@@ -72,7 +72,7 @@ Add some npm scripts in package.json to compile the TypeScript files to JavaScri
 
 Launch the TypeScript compiler from the command line in watch mode
 
-```
+```bash
   npm run tsc:w
 ```
 
@@ -82,7 +82,7 @@ Next, convert your current JavaScript files into TypeScript. Show tutorial.
 
 Add Angular and the other new dependencies to package.json
 
-```
+```bash
   ...
   "dependencies": {
     "@angular/common": "^8.2.8",
@@ -104,7 +104,7 @@ Add Angular and the other new dependencies to package.json
 
 Add systemjs.config.js to the project root directory
 
-```
+```bash
   /**
  * System configuration for Angular samples
  * Adjust as necessary for your application needs.
@@ -169,10 +169,10 @@ Add systemjs.config.js to the project root directory
 
 Add systemjs-angular-loader.js to the project root directory
 
-```
+```bash
   var templateUrlRegex = /templateUrl\s*:(\s*['"`](.*?)['"`]\s*)/gm;
-var stylesRegex = /styleUrls *:(\s*\[[^\]]*?\])/g;
-var stringRegex = /(['`"])((?:[^\\]\\\1|.)*?)\1/g;
+  var stylesRegex = /styleUrls *:(\s*\[[^\]]*?\])/g;
+  var stringRegex = /(['`"])((?:[^\\]\\\1|.)*?)\1/g;
 
 module.exports.translate = function(load){
   if (load.source.indexOf('moduleId') != -1) return load;
@@ -224,25 +224,25 @@ module.exports.translate = function(load){
 
 Once these are done, run:
 
-```
+```bash
   npm install
 ```
 
 Move the app/index.html file to the project root directory. Then change the development server root path in package.json to also point to the project root instead of app.
 
-```
+```bash
   "start": "http-server ./ -a localhost -p 8000 -c-1",
 ```
 
 Now you're able to serve everything from the project root to the web browser. But you do not want to have to change all the image and data paths used in the application code to match the development setup. For that reason, you'll add a <base> tag to index.html, which will cause relative URLs to be resolved back to the /app directory:
 
-```
+```bash
   <base href="/app/">
 ```
 
 Now you can load Angular via SystemJS. You'll add the Angular polyfills and the SystemJS config to the end of the <head> section, and then you'll use System.import to load the actual application:
 
-```
+```bash
   <script src="/node_modules/core-js/client/shim.min.js"></script>
   <script src="/node_modules/zone.js/dist/zone.js"></script>
   <script src="/node_modules/systemjs/dist/system.src.js"></script>
@@ -256,7 +256,7 @@ Install the upgrade package via npm install @angular/upgrade --save and add a ma
 
 If you get the following error when access to http://localhost:8000 
 
-```
+```bash
 zone.js:699 Unhandled Promise rejection: (SystemJS) Unexpected token '<'
 	SyntaxError: Unexpected token '<'
 	    at eval (<anonymous>)
@@ -274,18 +274,248 @@ zone.js:699 Unhandled Promise rejection: (SystemJS) Unexpected token '<'
 
 is due to this line of code
 
-```
+```bash
 <script>
     System.import('/app');
   </script>
 ```
+is solved in step 4 or comment the line for the moment // System.import('/app');
 
-is solved in the next step or comment the line for the moment // System.import('/app');
+Update href in Phone List Template.
+
+```bash
+  ...
+  <ul class="phones">
+    <li ng-repeat="phone in $ctrl.phones | filter:$ctrl.query | orderBy:$ctrl.orderProp"
+        class="thumbnail phone-list-item">
+      <a href="/#!/phones/{{phone.id}}" class="thumb">
+        <img ng-src="{{phone.imageUrl}}" alt="{{phone.name}}" />
+      </a>
+      <a href="/#!/phones/{{phone.id}}">{{phone.name}}</a>
+      <p>{{phone.snippet}}</p>
+    </li>
+  </ul>
+  ...
+```
+
+#### Step 3: Creating the AppModule
+
+Rename app.module.ts it to app.module.ajs.ts and update the corresponding script name in the index.html.
+
+Now create a new app.module.ts with the minimum NgModule class
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+
+  @NgModule({
+    imports: [
+      BrowserModule,
+    ],
+  })
+  export class AppModule {
+  }
+```
+
+#### Step 4: Bootstrapping a hybrid PhoneCat
+
+First, remove the ng-app attribute from index.html. Then import UpgradeModule in the AppModule, and override its ngDoBootstrap method.
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { UpgradeModule } from '@angular/upgrade/static';
+
+  @NgModule({
+    imports: [
+      BrowserModule,
+      UpgradeModule,
+    ],
+  })
+  export class AppModule {
+    constructor(private upgrade: UpgradeModule) { }
+    ngDoBootstrap() {
+      this.upgrade.bootstrap(document.documentElement, ['phonecatApp']);
+    }
+  }
+```
+
+Finally, bootstrap the AppModule in app/main.ts. This file has been configured as the application entrypoint in systemjs.config.js, so it is already being loaded by the browser.
+
+```bash
+  import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+  import { AppModule } from './app.module';
+
+  platformBrowserDynamic().bootstrapModule(AppModule);
+```
+
+Modify systemjs.config.js
+
+```bash
+  ...
+   // packages tells the System loader how to load when no filename and/or no extension
+      packages: {
+        'app': {
+          main: './main.js',
+          defaultExtension: 'js',
+          meta: {
+            './*.js': {
+              loader: 'ng-loader'
+            }
+          }
+        },
+  ...
+```
+
+#### Step 5: Upgrading the Phone service
+
+Import and add HttpClientModule to the imports array of the AppModule.
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { UpgradeModule } from '@angular/upgrade/static';
+  import { HttpClientModule } from '@angular/common/http';
+
+  @NgModule({
+    imports: [
+      BrowserModule,
+      UpgradeModule,
+      HttpClientModule
+    ],
+  })
+  export class AppModule {
+    constructor(private upgrade: UpgradeModule) { }
+    ngDoBootstrap() {
+      this.upgrade.bootstrap(document.documentElement, ['phonecatApp']);
+    }
+  }
+```
+
+Upgrade the Phone service itself.
+
+```bash
+  import { Injectable } from '@angular/core';
+  import { HttpClient } from '@angular/common/http';
+  import { Observable } from 'rxjs';
+
+  declare var angular: angular.IAngularStatic;
+  import { downgradeInjectable } from '@angular/upgrade/static';
+
+  export interface PhoneData {
+    name: string;
+    snippet: string;
+    images: string[];
+  }
+
+  @Injectable()
+  export class Phone {
+    constructor(private http: HttpClient) { }
+    query(): Observable<PhoneData[]> {
+      return this.http.get<PhoneData[]>(`phones/phones.json`);
+    }
+    get(id: string): Observable<PhoneData> {
+      return this.http.get<PhoneData>(`phones/${id}.json`);
+    }
+  }
+
+  angular.module('core.phone')
+    .factory('phone', downgradeInjectable(Phone));
+```
+
+The new Phone service has the same features as the original, ngResource-based service. Because it's an Angular service, you register it with the NgModule providers.
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { UpgradeModule } from '@angular/upgrade/static';
+  import { Phone } from './core/phone/phone.service';
+
+  @NgModule({
+    imports: [
+      BrowserModule,
+      UpgradeModule,
+    ],
+    providers: [
+      Phone
+    ]
+  })
+  export class AppModule {
+    constructor(private upgrade: UpgradeModule) { }
+    ngDoBootstrap() {
+      this.upgrade.bootstrap(document.documentElement, ['phonecatApp']);
+    }
+  }
+```
+
+Remove the <script> tag for the phone service from index.html
+
+At this point, you can switch the two components to use the new service instead of the old one. While you $inject it as the downgraded phone factory, it's really an instance of the Phone class and you annotate its type accordingly.
+
+app/phone-list/phone-list.component.ts
+
+```bash
+  declare var angular: angular.IAngularStatic;
+  import { Phone, PhoneData } from '../core/phone/phone.service';
+
+  class PhoneListController {
+    phones: PhoneData[];
+    orderProp: string;
+
+    static $inject = ['phone'];
+    constructor(phone: Phone) {
+      phone.query().subscribe(phones => {
+        this.phones = phones;
+      });
+      this.orderProp = 'age';
+    }
+
+  }
+
+  angular.
+    module('phoneList').
+    component('phoneList', {
+      templateUrl: 'app/phone-list/phone-list.template.html',
+      controller: PhoneListController
+    });
+```
+
+app/phone-detail/phone-detail.component.ts
+
+```bash
+  declare var angular: angular.IAngularStatic;
+  import { Phone, PhoneData } from '../core/phone/phone.service';
+
+  class PhoneDetailController {
+    phone: PhoneData;
+    mainImageUrl: string;
+
+    static $inject = ['$routeParams', 'phone'];
+    constructor($routeParams: angular.route.IRouteParamsService, phone: Phone) {
+      let phoneId = $routeParams['phoneId'];
+      phone.get(phoneId).subscribe(data => {
+        this.phone = data;
+        this.setImage(data.images[0]);
+      });
+    }
+
+    setImage(imageUrl: string) {
+      this.mainImageUrl = imageUrl;
+    }
+  }
+
+  angular.
+    module('phoneDetail').
+    component('phoneDetail', {
+      templateUrl: 'phone-detail/phone-detail.template.html',
+      controller: PhoneDetailController
+    });
+```
 
 
 ## Application Directory Layout After Upgrade
 
-```
+```bash
 aot/                     --> 
 app/                     --> all the source code of the app (along with unit tests)
   lib/...                --> 3rd party bootstrap CSS library
