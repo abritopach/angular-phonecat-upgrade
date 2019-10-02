@@ -2,12 +2,286 @@
 
 ## Overview
 
-Sample project where you migrate from AngularJS Phone Catalog to Angular (Angular 8) Phone Catalog.
+Sample project where you migrate from AngularJS Phone Catalog to Angular (Angular 8, current version) Phone Catalog.
 
 Angular is the name for the Angular of today and tomorrow.
 AngularJS is the name for all 1.x versions of Angular.
 
 The full migration guide can be found at https://angular.io/guide/upgrade#upgrading-from-angularjs-to-angular.
+
+## PhoneCat Upgrade Tutorial
+
+When performing the migration process, although the [tutorial](https://angular.io/guide/upgrade#phonecat-upgrade-tutorial) is quite detailed, code is missing in some sections of the tutorial.
+
+So that you don't have the problems I had I leave the code in each step.
+
+### Steps
+
+#### Step 1: Switching to TypeScript
+
+Install TypeScript to the project.
+
+```
+  npm i typescript --save-dev
+```
+
+Install type definitions for the existing libraries that you're using but that don't come with prepackaged types: AngularJS and the Jasmine unit test framework.
+
+```
+  npm install @types/jasmine @types/angular @types/angular-animate @types/angular-cookies @types/angular-mocks @types/angular-resource @types/angular-route @types/angular-sanitize --save-dev
+```
+
+Add a tsconfig.json in the project directory.
+
+```
+  {
+    "compileOnSave": false,
+    "compilerOptions": {
+      "sourceMap": true,
+      "declaration": false,
+      "module": "umd",
+      "moduleResolution": "node",
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "importHelpers": true,
+      "target": "es2015",
+      "typeRoots": [
+        "node_modules/@types"
+      ],
+      "lib": [
+        "es2018",
+        "dom"
+      ]
+    },
+    "angularCompilerOptions": {
+      "fullTemplateTypeCheck": true,
+      "strictInjectionParameters": true
+    }
+  }
+```
+
+Add some npm scripts in package.json to compile the TypeScript files to JavaScript (based on the tsconfig.json configuration file).
+
+```
+  "scripts": {
+  "tsc": "tsc",
+  "tsc:w": "tsc -w",
+  ...
+
+```
+
+Launch the TypeScript compiler from the command line in watch mode
+
+```
+  npm run tsc:w
+```
+
+Next, convert your current JavaScript files into TypeScript. Show tutorial.
+
+#### Step 2: Installing Angular
+
+Add Angular and the other new dependencies to package.json
+
+```
+  ...
+  "dependencies": {
+    "@angular/common": "^8.2.8",
+    "@angular/compiler": "^8.2.8",
+    "@angular/core": "^8.2.8",
+    "@angular/forms": "^8.2.8",
+    "@angular/http": "~7.2.15",
+    "@angular/platform-browser": "^8.2.8",
+    "@angular/platform-browser-dynamic": "^8.2.8",
+    "@angular/router": "^8.2.8",
+    "angular-in-memory-web-api": "~0.3.0",
+    "core-js": "^2.4.1",
+    "rxjs": "^6.5.3",
+    "systemjs": "0.19.40",
+    "zone.js": "^0.10.2"
+  },
+  ...
+```
+
+Add systemjs.config.js to the project root directory
+
+```
+  /**
+ * System configuration for Angular samples
+ * Adjust as necessary for your application needs.
+ */
+(function (global) {
+    // #docregion paths
+    System.config({
+      paths: {
+        // paths serve as alias
+        'npm:': '/node_modules/'
+      },
+      map: {
+        'ng-loader': '/systemjs-angular-loader.js',
+        app: '/app',
+        // #enddocregion paths
+        // angular bundles
+        '@angular/core': 'npm:@angular/core/bundles/core.umd.js',
+        '@angular/common': 'npm:@angular/common/bundles/common.umd.js',
+        '@angular/common/http': 'npm:@angular/common/bundles/common-http.umd.js',
+        '@angular/compiler': 'npm:@angular/compiler/bundles/compiler.umd.js',
+        '@angular/platform-browser': 'npm:@angular/platform-browser/bundles/platform-browser.umd.js',
+        '@angular/platform-browser-dynamic': 'npm:@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js',
+        '@angular/router': 'npm:@angular/router/bundles/router.umd.js',
+        '@angular/router/upgrade': 'npm:@angular/router/bundles/router-upgrade.umd.js',
+        '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
+        // #docregion paths
+        '@angular/upgrade/static': 'npm:@angular/upgrade/bundles/upgrade-static.umd.js',
+        // #enddocregion paths
+  
+        // other libraries
+        'rxjs': 'npm:rxjs',
+        'angular-in-memory-web-api': 'npm:angular-in-memory-web-api',
+        'tslib': 'npm:tslib/tslib.js',
+        // #docregion paths
+      },
+      // #enddocregion paths
+  
+      // packages tells the System loader how to load when no filename and/or no extension
+      packages: {
+        'app': {
+          defaultExtension: 'js',
+          meta: {
+            './*.js': {
+              loader: 'ng-loader'
+            }
+          }
+        },
+        'angular-in-memory-web-api': {
+          main: './index.js',
+          defaultExtension: 'js'
+        },
+        'rxjs/ajax': {main: 'index.js', defaultExtension: 'js' },
+        'rxjs/operators': {main: 'index.js', defaultExtension: 'js' },
+        'rxjs/testing': {main: 'index.js', defaultExtension: 'js' },
+        'rxjs/websocket': {main: 'index.js', defaultExtension: 'js' },
+        'rxjs': { main: 'index.js', defaultExtension: 'js' },
+      }
+    });
+  })(this);
+  
+```
+
+Add systemjs-angular-loader.js to the project root directory
+
+```
+  var templateUrlRegex = /templateUrl\s*:(\s*['"`](.*?)['"`]\s*)/gm;
+var stylesRegex = /styleUrls *:(\s*\[[^\]]*?\])/g;
+var stringRegex = /(['`"])((?:[^\\]\\\1|.)*?)\1/g;
+
+module.exports.translate = function(load){
+  if (load.source.indexOf('moduleId') != -1) return load;
+
+  var url = document.createElement('a');
+  url.href = load.address;
+
+  var basePathParts = url.pathname.split('/');
+
+  basePathParts.pop();
+  var basePath = basePathParts.join('/');
+
+  var baseHref = document.createElement('a');
+  baseHref.href = this.baseURL;
+  baseHref = baseHref.pathname;
+
+  if (!baseHref.startsWith('/base/')) { // it is not karma
+    basePath = basePath.replace(baseHref, '');
+  }
+
+  load.source = load.source
+    .replace(templateUrlRegex, function(match, quote, url){
+      var resolvedUrl = url;
+
+      if (url.startsWith('.')) {
+        resolvedUrl = basePath + url.substr(1);
+      }
+
+      return 'templateUrl: "' + resolvedUrl + '"';
+    })
+    .replace(stylesRegex, function(match, relativeUrls) {
+      var urls = [];
+
+      while ((match = stringRegex.exec(relativeUrls)) !== null) {
+        if (match[2].startsWith('.')) {
+          urls.push('"' + basePath + match[2].substr(1) + '"');
+        } else {
+          urls.push('"' + match[2] + '"');
+        }
+      }
+
+      return "styleUrls: [" + urls.join(', ') + "]";
+    });
+
+  return load;
+};
+
+```
+
+Once these are done, run:
+
+```
+  npm install
+```
+
+Move the app/index.html file to the project root directory. Then change the development server root path in package.json to also point to the project root instead of app.
+
+```
+  "start": "http-server ./ -a localhost -p 8000 -c-1",
+```
+
+Now you're able to serve everything from the project root to the web browser. But you do not want to have to change all the image and data paths used in the application code to match the development setup. For that reason, you'll add a <base> tag to index.html, which will cause relative URLs to be resolved back to the /app directory:
+
+```
+  <base href="/app/">
+```
+
+Now you can load Angular via SystemJS. You'll add the Angular polyfills and the SystemJS config to the end of the <head> section, and then you'll use System.import to load the actual application:
+
+```
+  <script src="/node_modules/core-js/client/shim.min.js"></script>
+  <script src="/node_modules/zone.js/dist/zone.js"></script>
+  <script src="/node_modules/systemjs/dist/system.src.js"></script>
+  <script src="/systemjs.config.js"></script>
+  <script>
+    System.import('/app');
+  </script>
+```
+
+Install the upgrade package via npm install @angular/upgrade --save and add a mapping for the @angular/upgrade/static package.
+
+If you get the following error when access to http://localhost:8000 
+
+```
+zone.js:699 Unhandled Promise rejection: (SystemJS) Unexpected token '<'
+	SyntaxError: Unexpected token '<'
+	    at eval (<anonymous>)
+	Evaluating http://localhost:8000/app
+	Error loading http://localhost:8000/app ; Zone: <root> ; Task: Promise.then ; Value: (SystemJS) Unexpected token '<'
+	SyntaxError: Unexpected token '<'
+	    at eval (<anonymous>)
+	Evaluating http://localhost:8000/app
+	Error loading http://localhost:8000/app (SystemJS) Unexpected token '<'
+	SyntaxError: Unexpected token '<'
+	    at eval (<anonymous>)
+	Evaluating http://localhost:8000/app
+	Error loading http://localhost:8000/app
+```
+
+is due to this line of code
+
+```
+<script>
+    System.import('/app');
+  </script>
+```
+
+is solved in the next step or comment the line for the moment // System.import('/app');
+
 
 ## Application Directory Layout After Upgrade
 
