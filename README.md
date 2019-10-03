@@ -429,12 +429,14 @@ The new Phone service has the same features as the original, ngResource-based se
   import { NgModule } from '@angular/core';
   import { BrowserModule } from '@angular/platform-browser';
   import { UpgradeModule } from '@angular/upgrade/static';
+  import { HttpClientModule } from '@angular/common/http';
   import { Phone } from './core/phone/phone.service';
 
   @NgModule({
     imports: [
       BrowserModule,
       UpgradeModule,
+      HttpClientModule
     ],
     providers: [
       Phone
@@ -510,6 +512,682 @@ app/phone-detail/phone-detail.component.ts
       templateUrl: 'phone-detail/phone-detail.template.html',
       controller: PhoneDetailController
     });
+```
+
+#### Step 6: Upgrading Components
+
+app/phone-list/phone-list.component.ts
+
+```bash
+
+  declare var angular: angular.IAngularStatic;
+  import { downgradeComponent } from '@angular/upgrade/static';
+
+  import { Component } from '@angular/core';
+  import { Phone, PhoneData } from '../core/phone/phone.service';
+
+  @Component({
+    selector: 'phone-list',
+    templateUrl: './phone-list.template.html'
+  })
+  export class PhoneListComponent {
+    phones: PhoneData[];
+    query: string;
+    orderProp: string;
+
+    constructor(phone: Phone) {
+      phone.query().subscribe(phones => {
+        this.phones = phones;
+      });
+      this.orderProp = 'age';
+    }
+  
+    getPhones(): PhoneData[] {
+      return this.sortPhones(this.filterPhones(this.phones));
+    }
+
+    private filterPhones(phones: PhoneData[]) {
+      if (phones && this.query) {
+        return phones.filter(phone => {
+          let name = phone.name.toLowerCase();
+          let snippet = phone.snippet.toLowerCase();
+          return name.indexOf(this.query) >= 0 || snippet.indexOf(this.query) >= 0;
+        });
+      }
+      return phones;
+    }
+
+    private sortPhones(phones: PhoneData[]) {
+      if (phones && this.orderProp) {
+        return phones
+          .slice(0) // Make a copy
+          .sort((a, b) => {
+            if (a[this.orderProp] < b[this.orderProp]) {
+              return -1;
+            } else if ([b[this.orderProp] < a[this.orderProp]]) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+      }
+      return phones;
+    }
+  }
+
+  angular.module('phoneList')
+  .directive(
+    'phoneList',
+    downgradeComponent({component: PhoneListComponent}) as angular.IDirectiveFactory
+  );
+```
+
+app/phone-list/phone-list.template.html (search controls)
+
+```bash
+  <p>
+    Search:
+    <input [(ngModel)]="query" />
+  </p>
+
+  <p>
+    Sort by:
+    <select [(ngModel)]="orderProp">
+      <option value="name">Alphabetical</option>
+      <option value="age">Newest</option>
+    </select>
+  </p>
+```
+
+app/phone-list/phone-list.template.html (phones)
+
+```bash
+  <ul class="phones">
+    <li *ngFor="let phone of getPhones()"
+        class="thumbnail phone-list-item">
+      <a href="/#!/phones/{{phone.id}}" class="thumb">
+        <img [src]="phone.imageUrl" [alt]="phone.name" />
+      </a>
+      <a href="/#!/phones/{{phone.id}}" class="name">{{phone.name}}</a>
+      <p>{{phone.snippet}}</p>
+    </li>
+  </ul>
+```
+
+app.module.ts
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { UpgradeModule } from '@angular/upgrade/static';
+  import { Phone } from './core/phone/phone.service';
+  import { HttpClientModule } from '@angular/common/http';
+
+  import { FormsModule } from '@angular/forms';
+  import { PhoneListComponent } from './phone-list/phone-list.component';
+
+  @NgModule({
+  imports: [
+      BrowserModule,
+      UpgradeModule,
+      HttpClientModule,
+      FormsModule,
+  ],
+  providers: [
+      Phone
+  ],
+  declarations: [
+      PhoneListComponent,
+    ],
+    entryComponents: [
+      PhoneListComponent
+    ]
+  })
+  export class AppModule {
+  constructor(private upgrade: UpgradeModule) { }
+  ngDoBootstrap() {
+      this.upgrade.bootstrap(document.documentElement, ['phonecatApp']);
+  }
+}
+```
+
+Remove the <script> tag for the phone list component from index.html.
+
+app/phone-detail/phone-detail.component.ts
+
+```bash
+  declare var angular: angular.IAngularStatic;
+  import { downgradeComponent } from '@angular/upgrade/static';
+
+  import { Component } from '@angular/core';
+
+  import { Phone, PhoneData } from '../core/phone/phone.service';
+  import { RouteParams } from '../ajs-upgraded-providers';
+
+  @Component({
+    selector: 'phone-detail',
+    templateUrl: './phone-detail.template.html',
+  })
+  export class PhoneDetailComponent {
+    phone: PhoneData;
+    mainImageUrl: string;
+
+    constructor(routeParams: RouteParams, phone: Phone) {
+      phone.get(routeParams['phoneId']).subscribe(phone => {
+        this.phone = phone;
+        this.setImage(phone.images[0]);
+      });
+    }
+
+    setImage(imageUrl: string) {
+      this.mainImageUrl = imageUrl;
+    }
+  }
+
+  angular.module('phoneDetail')
+    .directive(
+      'phoneDetail',
+      downgradeComponent({component: PhoneDetailComponent}) as angular.IDirectiveFactory
+    );
+```
+
+Create ajs-upgraded-providers.ts and import it in app.module.ts
+
+app/ajs-upgraded-providers.ts
+
+```bash
+  export abstract class RouteParams {
+  [key: string]: string;
+  }
+
+  export function routeParamsFactory(i: any) {
+    return i.get('$routeParams');
+  }
+
+  export const routeParamsProvider = {
+    provide: RouteParams,
+    useFactory: routeParamsFactory,
+    deps: ['$injector']
+  };
+```
+
+app/app.module.ts ($routeParams)
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { UpgradeModule } from '@angular/upgrade/static';
+  import { Phone } from './core/phone/phone.service';
+  import { HttpClientModule } from '@angular/common/http';
+
+  import { FormsModule } from '@angular/forms';
+  import { PhoneListComponent } from './phone-list/phone-list.component';
+
+  import { routeParamsProvider } from './ajs-upgraded-provider';
+
+  @NgModule({
+  imports: [
+      BrowserModule,
+      UpgradeModule,
+      HttpClientModule,
+      FormsModule,
+  ],
+  providers: [
+      Phone,
+      routeParamsProvider
+  ],
+  declarations: [
+      PhoneListComponent,
+    ],
+    entryComponents: [
+      PhoneListComponent
+    ]
+  })
+  export class AppModule {
+  constructor(private upgrade: UpgradeModule) { }
+  ngDoBootstrap() {
+      this.upgrade.bootstrap(document.documentElement, ['phonecatApp']);
+  }
+}
+```
+
+app/phone-detail/phone-detail.template.html
+
+```bash
+  <div *ngIf="phone">
+  <div class="phone-images">
+    <img [src]="img" class="phone"
+        [ngClass]="{'selected': img === mainImageUrl}"
+        *ngFor="let img of phone.images" />
+  </div>
+
+  <h1>{{phone.name}}</h1>
+
+  <p>{{phone.description}}</p>
+
+  <ul class="phone-thumbs">
+    <li *ngFor="let img of phone.images">
+      <img [src]="img" (click)="setImage(img)" />
+    </li>
+  </ul>
+
+  <ul class="specs">
+    <li>
+      <span>Availability and Networks</span>
+      <dl>
+        <dt>Availability</dt>
+        <dd *ngFor="let availability of phone.availability">{{availability}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Battery</span>
+      <dl>
+        <dt>Type</dt>
+        <dd>{{phone.battery?.type}}</dd>
+        <dt>Talk Time</dt>
+        <dd>{{phone.battery?.talkTime}}</dd>
+        <dt>Standby time (max)</dt>
+        <dd>{{phone.battery?.standbyTime}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Storage and Memory</span>
+      <dl>
+        <dt>RAM</dt>
+        <dd>{{phone.storage?.ram}}</dd>
+        <dt>Internal Storage</dt>
+        <dd>{{phone.storage?.flash}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Connectivity</span>
+      <dl>
+        <dt>Network Support</dt>
+        <dd>{{phone.connectivity?.cell}}</dd>
+        <dt>WiFi</dt>
+        <dd>{{phone.connectivity?.wifi}}</dd>
+        <dt>Bluetooth</dt>
+        <dd>{{phone.connectivity?.bluetooth}}</dd>
+        <dt>Infrared</dt>
+        <dd>{{phone.connectivity?.infrared | checkmark}}</dd>
+        <dt>GPS</dt>
+        <dd>{{phone.connectivity?.gps | checkmark}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Android</span>
+      <dl>
+        <dt>OS Version</dt>
+        <dd>{{phone.android?.os}}</dd>
+        <dt>UI</dt>
+        <dd>{{phone.android?.ui}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Size and Weight</span>
+      <dl>
+        <dt>Dimensions</dt>
+        <dd *ngFor="let dim of phone.sizeAndWeight?.dimensions">{{dim}}</dd>
+        <dt>Weight</dt>
+        <dd>{{phone.sizeAndWeight?.weight}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Display</span>
+      <dl>
+        <dt>Screen size</dt>
+        <dd>{{phone.display?.screenSize}}</dd>
+        <dt>Screen resolution</dt>
+        <dd>{{phone.display?.screenResolution}}</dd>
+        <dt>Touch screen</dt>
+        <dd>{{phone.display?.touchScreen | checkmark}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Hardware</span>
+      <dl>
+        <dt>CPU</dt>
+        <dd>{{phone.hardware?.cpu}}</dd>
+        <dt>USB</dt>
+        <dd>{{phone.hardware?.usb}}</dd>
+        <dt>Audio / headphone jack</dt>
+        <dd>{{phone.hardware?.audioJack}}</dd>
+        <dt>FM Radio</dt>
+        <dd>{{phone.hardware?.fmRadio | checkmark}}</dd>
+        <dt>Accelerometer</dt>
+        <dd>{{phone.hardware?.accelerometer | checkmark}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Camera</span>
+      <dl>
+        <dt>Primary</dt>
+        <dd>{{phone.camera?.primary}}</dd>
+        <dt>Features</dt>
+        <dd>{{phone.camera?.features?.join(', ')}}</dd>
+      </dl>
+    </li>
+    <li>
+      <span>Additional Features</span>
+      <dd>{{phone.additionalFeatures}}</dd>
+    </li>
+  </ul>
+</div>
+```
+
+Add PhoneDetailComponent component to the NgModule declarations and entryComponents
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { UpgradeModule } from '@angular/upgrade/static';
+  import { Phone } from './core/phone/phone.service';
+  import { HttpClientModule } from '@angular/common/http';
+
+  import { FormsModule } from '@angular/forms';
+  import { PhoneListComponent } from './phone-list/phone-list.component';
+
+  import { routeParamsProvider } from './ajs-upgraded-provider';
+  import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
+
+  @NgModule({
+  imports: [
+      BrowserModule,
+      UpgradeModule,
+      HttpClientModule,
+      FormsModule,
+  ],
+  providers: [
+      Phone,
+      routeParamsProvider
+  ],
+  declarations: [
+      PhoneListComponent,
+      PhoneDetailComponent
+    ],
+    entryComponents: [
+      PhoneListComponent,
+      PhoneDetailComponent
+    ]
+  })
+  export class AppModule {
+  constructor(private upgrade: UpgradeModule) { }
+  ngDoBootstrap() {
+      this.upgrade.bootstrap(document.documentElement, ['phonecatApp']);
+  }
+}
+```
+
+The AngularJS directive had a checkmark filter. Turn that into an Angular pipe.
+
+There is no upgrade method to convert filters into pipes. You won't miss it. It's easy to turn the filter function into an equivalent Pipe class. The implementation is the same as before, repackaged in the transform method. Rename the file to checkmark.pipe.ts to conform with Angular conventions
+
+app/core/checkmark/checkmark.pipe.ts
+
+```bash
+  import { Pipe, PipeTransform } from '@angular/core';
+
+  @Pipe({name: 'checkmark'})
+  export class CheckmarkPipe implements PipeTransform {
+    transform(input: boolean) {
+      return input ? '\u2713' : '\u2718';
+    }
+  }
+```
+
+app/app.module.ts (checkmarkpipe)
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { UpgradeModule } from '@angular/upgrade/static';
+  import { Phone } from './core/phone/phone.service';
+  import { HttpClientModule } from '@angular/common/http';
+
+  import { FormsModule } from '@angular/forms';
+  import { PhoneListComponent } from './phone-list/phone-list.component';
+
+  import { routeParamsProvider } from './ajs-upgraded-provider';
+  import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
+
+  import { CheckmarkPipe } from './core/checkmark/checkmark.pipe';
+
+  @NgModule({
+  imports: [
+      BrowserModule,
+      UpgradeModule,
+      HttpClientModule,
+      FormsModule,
+  ],
+  providers: [
+      Phone,
+      routeParamsProvider
+  ],
+  declarations: [
+      PhoneListComponent,
+      PhoneDetailComponent,
+      CheckmarkPipe
+    ],
+    entryComponents: [
+      PhoneListComponent,
+      PhoneDetailComponent
+    ]
+  })
+  export class AppModule {
+  constructor(private upgrade: UpgradeModule) { }
+  ngDoBootstrap() {
+      this.upgrade.bootstrap(document.documentElement, ['phonecatApp']);
+  }
+}
+```
+
+Remove the filter <script> tag from index.html
+
+#### Step 7: Adding The Angular Router And Bootstrap
+
+Create a new app.component.ts file with the following AppComponent class
+
+```bash
+  import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'phonecat-app',
+    template: '<router-outlet></router-outlet>'
+  })
+  export class AppComponent { }
+```
+
+It has a simple template that only includes the <router-outlet>. This component just renders the contents of the active route and nothing else.
+
+The selector tells Angular to plug this root component into the <phonecat-app> element on the host web page when the application launches.
+
+Add this <phonecat-app> element to the index.html. It replaces the old AngularJS ng-view directive
+
+index.html (body)
+
+```bash
+  <body>
+    <phonecat-app></phonecat-app>
+  </body>
+```
+
+app/app-routing.module.ts
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { Routes, RouterModule } from '@angular/router';
+  import { APP_BASE_HREF, HashLocationStrategy, LocationStrategy } from '@angular/common';
+
+  import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
+  import { PhoneListComponent }   from './phone-list/phone-list.component';
+
+  const routes: Routes = [
+    { path: '', redirectTo: 'phones', pathMatch: 'full' },
+    { path: 'phones',          component: PhoneListComponent },
+    { path: 'phones/:phoneId', component: PhoneDetailComponent }
+  ];
+
+  @NgModule({
+    imports: [ RouterModule.forRoot(routes) ],
+    exports: [ RouterModule ],
+    providers: [
+      { provide: APP_BASE_HREF, useValue: '!' },
+      { provide: LocationStrategy, useClass: HashLocationStrategy },
+    ]
+  })
+  export class AppRoutingModule { }
+```
+
+app/app.module.ts
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { FormsModule } from '@angular/forms';
+  import { HttpClientModule } from '@angular/common/http';
+
+  import { AppRoutingModule } from './app-routing.module';
+  import { AppComponent }     from './app.component';
+  import { CheckmarkPipe }    from './core/checkmark/checkmark.pipe';
+  import { Phone }            from './core/phone/phone.service';
+  import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
+  import { PhoneListComponent }   from './phone-list/phone-list.component';
+
+  @NgModule({
+    imports: [
+      BrowserModule,
+      FormsModule,
+      HttpClientModule,
+      AppRoutingModule
+    ],
+    declarations: [
+      AppComponent,
+      PhoneListComponent,
+      CheckmarkPipe,
+      PhoneDetailComponent
+    ],
+    providers: [
+      Phone
+    ],
+    bootstrap: [ AppComponent ]
+  })
+  export class AppModule {}
+```
+
+app/phone-list/phone-list.template.html (list with links)
+
+```bash
+  <ul class="phones">
+  <li *ngFor="let phone of getPhones()"
+      class="thumbnail phone-list-item">
+    <a [routerLink]="['/phones', phone.id]" class="thumb">
+      <img [src]="phone.imageUrl" [alt]="phone.name" />
+    </a>
+    <a [routerLink]="['/phones', phone.id]" class="name">{{phone.name}}</a>
+    <p>{{phone.snippet}}</p>
+  </li>
+  </ul>
+```
+
+app/phone-detail/phone-detail.component.ts
+
+```bash
+  import { Component }      from '@angular/core';
+  import { ActivatedRoute } from '@angular/router';
+
+  import { Phone, PhoneData } from '../core/phone/phone.service';
+
+  @Component({
+    selector: 'phone-detail',
+    templateUrl: './phone-detail.template.html'
+  })
+  export class PhoneDetailComponent {
+    phone: PhoneData;
+    mainImageUrl: string;
+
+    constructor(activatedRoute: ActivatedRoute, phone: Phone) {
+      phone.get(activatedRoute.snapshot.paramMap.get('phoneId'))
+        .subscribe((p: PhoneData) => {
+          this.phone = p;
+          this.setImage(p.images[0]);
+        });
+    }
+
+    setImage(imageUrl: string) {
+      this.mainImageUrl = imageUrl;
+    }
+  }
+```
+
+#### Step 8: Say Goodbye to AngularJS
+
+main.ts
+
+```bash
+  import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+
+  import { AppModule } from './app.module';
+
+  platformBrowserDynamic().bootstrapModule(AppModule);
+```
+
+Also remove any downgradeInjectable() or downgradeComponent() you find, together with the associated AngularJS factory or directive declarations.
+
+app.module.ts
+
+```bash
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { FormsModule } from '@angular/forms';
+  import { HttpClientModule } from '@angular/common/http';
+
+  import { AppRoutingModule } from './app-routing.module';
+  import { AppComponent }     from './app.component';
+  import { CheckmarkPipe }    from './core/checkmark/checkmark.pipe';
+  import { Phone }            from './core/phone/phone.service';
+  import { PhoneDetailComponent } from './phone-detail/phone-detail.component';
+  import { PhoneListComponent }   from './phone-list/phone-list.component';
+
+  @NgModule({
+    imports: [
+      BrowserModule,
+      FormsModule,
+      HttpClientModule,
+      AppRoutingModule
+    ],
+    declarations: [
+      AppComponent,
+      PhoneListComponent,
+      CheckmarkPipe,
+      PhoneDetailComponent
+    ],
+    providers: [
+      Phone
+    ],
+    bootstrap: [ AppComponent ]
+  })
+  export class AppModule {}
+```
+
+You may also completely remove the following files. They are AngularJS module configuration files and not needed in Angular:
+
+app/app.module.ajs.ts
+app/app.config.ts
+app/core/core.module.ts
+app/core/phone/phone.module.ts
+app/phone-detail/phone-detail.module.ts
+app/phone-list/phone-list.module.ts
+
+The external typings for AngularJS may be uninstalled as well. The only ones you still need are for Jasmine and Angular polyfills. The @angular/upgrade package and its mapping in systemjs.config.js can also go.
+
+```bash
+  npm uninstall @angular/upgrade --save
+  npm uninstall @types/angular @types/angular-animate @types/angular-cookies @types/angular-mocks @types/angular-resource @types/angular-route @types/angular-sanitize --save-dev
+```
+
+Finally, from index.html, remove all references to AngularJS scripts and jQuery. When you're done, this is what it should look like
+
+```bash
 ```
 
 
